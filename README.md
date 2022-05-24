@@ -46,7 +46,7 @@ Each of these blocks has its own fields, presented in the tables below:
   
 | Parameter name| Type | example | Description |    
 |-----------|------------|---------|-------------|    
-| env_name|string| dubins-car| Optimal control task to solve    
+| env_name|string| dubins-car| Optimal control problem to solve    
 |dt| float  | 0.1        | Discretization step of continuous environment  
 
 Possible *env_name* values:  
@@ -61,7 +61,8 @@ Possible *env_name* values:
 |-----------|------------|---------|-------------|    
 | model_name|string| naf| One of the algorithms, described in article    
 |lr| float  | 0.001        | Learning rate  
-|gamma| float  | 0.99        |Reward discount rate  
+|gamma| float  | 1        |Reward discount rate
+|tau| float  | 0.01        | Smoothing parameter 
 
 Possible *model_name* values:  
 - *naf* - original Normalized Advanced Functions algorithm.  
@@ -86,32 +87,42 @@ Possible *model_name* values:
 #### train_config.json example:
 
 ```
-{    
-  "environment": {    
-     "env_name": "dubins-car",      
-     "dt": 0.1    
- },  
-  "model": {    
-     "model_name": "naf",    
-     "lr": 0.001,    
-     "gamma": 1    
-  },    
-  "train_settings": {    
-     "epoch_num": 1000,    
-     "batch_size": 128,    
-     "render": false,    
-     "random_seed": [0,1,2],    
-     "save_rewards_path": "./rewards/dubinsCar/dt0.1/naf"    
-  }    
-}    
+{
+  "environment": {
+    "env_name": "pendulum",
+    "dt": 0.1
+  },
+  "model": {
+    "model_name": "naf",
+    "lr": 0.001,
+    "gamma": 1,
+	"tau":0.01
+  },
+  "learning": {
+    "epoch_num": 1000,
+    "batch_size": 128,
+    "render": false,
+    "random_seed": 0,
+    "save_rewards_path": "./data/pendulum/naf_rewards",
+    "save_model_path": "./data/pendulum/naf_model",
+    "save_plot_path": "./data/pendulum/naf_plot"
+  }
+}
 ```    
- > You can find prepared config files for all environment's in folder **/configs**.  
+ > You can find prepared config files for all environments in folder **/configs**.  
 ## Evaluation    
- To evaluate pre-trained model, run:    
+To evaluate pre-trained model, run:    
     
 ```  
 python eval.py --config <path to config file>    
-```    
+```
+For example:
+
+```  
+python eval.py --config .\configs\eval_config.json
+```  
+
+
 This script prints to the console all the states of the environment during the evaluation and outputs the final score.    
   #### **Evaluation config file  structure:**   
   The configuration file is presented as a json file with 3 required params - *environment*, *checkpoint*, *random_seed*.  
@@ -121,7 +132,7 @@ This script prints to the console all the states of the environment during the e
 | Parameter name | Type | example | Description |    
 |-----------|------------|---------|-------------|    
 | environment|json |{"env_name": "dubins-car",  "dt": 0.1 } | the same object as in the training section  
-|checkpoint    |path |  \path\to\checkpoint\file               | Path to pre-trained model  
+|model    |path |  \path\to\checkpoint\file               | Path to pre-trained model  
 |random_seed|int|  0               | Random seed to fix stochastic effects  
     
 > Note that you can only use the model for the task on which it was trained    
@@ -134,9 +145,9 @@ This script prints to the console all the states of the environment during the e
      "env_name": "dubins-car",      
      "dt": 0.1    
  },  
-  "checkpoint": ./naf_checkpoint,
+  "model": "./data/pendulum/naf_model",
   "random_seed": 0      
-}    
+}   
 ```    
     
  ## Results
