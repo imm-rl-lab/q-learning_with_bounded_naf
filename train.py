@@ -1,26 +1,15 @@
-import argparse
-import json
-import os
-
+import argparse, torch, os, json, random
 import matplotlib.pyplot as plt
-import torch
-import random
 import numpy as np
-
 from environments.enviroment_generator import generate_env
-from models.agent_evaluation_module import SingleAgentEvaluationModule
+from models.solver import Solver
 from models.agent_generator import AgentGenerator
+from models.configure_seed import configure_seed
 
 
-def configure_random_seed(seed):
-    torch.manual_seed(seed)
-    random.seed(seed)
-    np.random.seed(seed)
-
-
-def plot_reward(epoch_num, rewards_array, save_plot_path):
+def plot_reward(epoch_num, rewards, save_plot_path):
     if save_plot_path:
-        plt.plot(range(epoch_num), rewards_array)
+        plt.plot(range(epoch_num), rewards)
         plt.xlabel('episodes')
         plt.ylabel('rewards')
         ax = plt.gca()
@@ -28,38 +17,42 @@ def plot_reward(epoch_num, rewards_array, save_plot_path):
         plt.grid(color='white')
         plt.savefig(save_plot_path)
         plt.show()
+    return None
 
+if __name__ == "__main__":
+    #get config
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', required=True)
+    args = parser.parse_args()
+    with open(args.config) as json_config_file:
+        config = json.load(json_config_file)
+    
+    #get learning config
+    learning_config = config['learning']
+    
+    #set seed
+    seed = learning_config.get('random_seed')
+    print(f'Start training with random seed: {seed}')
+    configure_seed(seed)
+    
+    #get environment
+    env = generate_env(config['environment'])
 
-def file_path(string):
-    if os.path.isfile(string):
-        return string
-    else:
-        raise FileNotFoundError(string)
+    #get agent
+    agent_generator = AgentGenerator(env, learning_config)
+    agent = agent_generator.generate(config['model'])
+    
+    #train agent
+    solver = Solver(env)
+    mean_total_rewards = solver.train(agent, learning_config)
+    plot_reward(learning_config['epoch_num'], mean_total_rewards, learning_config.get('save_plot_path'))
 
+    #save model
+    save_model_path = learning_config.get('save_model_path')
+    if save_model_path:
+        agent.save(save_model_path)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=file_path, required=True)
-args = parser.parse_args()
-
-with open(args.config) as json_config_file:
-    config = json.load(json_config_file)
-train_settings = config['train_settings']
-seed = train_settings.get('random_seed')
-print(f'Start training with random seed: {seed}')
-configure_random_seed(seed)
-env = generate_env(config['environment'])
-
-agent_generator = AgentGenerator(env, train_settings=train_settings)
-
-agent = agent_generator.generate(model_cfg=config['model'])
-training_module = SingleAgentEvaluationModule(env)
-rewards = training_module.train_agent(agent, train_settings)
-plot_reward(train_settings['epoch_num'], rewards, train_settings.get('save_model_path'))
-
-save_model_path = train_settings.get('save_model_path')
-if save_model_path:
-    agent.save(save_model_path)
-
-save_rewards_path = train_settings.get('save_rewards_path')
-if save_rewards_path:
-    np.save(save_rewards_path, rewards)
+    #save rewards
+    save_rewards_path = learning_config.get('save_rewards_path')
+    if save_rewards_path:
+        np.save(save_rewards_path, mean_total_rewards)
