@@ -3,6 +3,6 @@
      "env_name": "dubins-car",      
      "dt": 0.1    
  },  
-  "model": "../data/dubinsCar/ddpg_model",
+  "model": "./data/dubinsCar/rb-bnaf_model",
   "random_seed": 0      
 }
