@@ -61,7 +61,8 @@ Possible *env_name* values:
 |-----------|------------|---------|-------------|    
 | model_name|string| naf| One of the algorithms, described in article    
 |lr| float  | 0.001        | Learning rate  
-|gamma| float  | 0.99        |Reward discount rate  
+|gamma| float  | 1        |Reward discount rate
+|tau| float  | 0.01        | Smooth parameter 
 
 Possible *model_name* values:  
 - *naf* - original Normalized Advanced Functions algorithm.  
