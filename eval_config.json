@@ -1,8 +1,8 @@
 {    
   "environment": {    
-     "env_name": "van-der-pol",      
+     "env_name": "dubins-car",      
      "dt": 0.1    
  },  
-  "checkpoint": checkpoints/vanDerPol,
+  "model": "data/dubinsCar/ddpg_model",
   "random_seed": 0      
 }
