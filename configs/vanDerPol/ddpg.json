@@ -1,20 +1,21 @@
 {
   "environment": {
     "env_name": "van-der-pol",
-     "dt": 0.1
+    "dt": 0.1
   },
   "model": {
     "model_name": "ddpg",
     "lr": 0.001,
-    "gamma": 1
+    "gamma": 1,
+	"tau": 0.01
   },
-  "train_settings": {
+  "learning": {
     "epoch_num": 1000,
     "batch_size": 128,
     "render": false,
     "random_seed": 0,
-    "save_rewards_path": "./rewards/vanDerPol/ddpg",
-    "save_model_path": "./checkpoints/vanDerPol/ddpg",
-    "save_plot_path": "./plots/vanDerPol-ddpg"
+    "save_rewards_path": "./data/vanDerPol/ddpg_rewards",
+    "save_model_path": "./data/vanDerPol/ddpg_model",
+    "save_plot_path": "./data/vanDerPol/ddpg_plot"
   }
 }
