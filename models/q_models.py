@@ -28,6 +28,7 @@ class QModel(nn.Module):
             action_dim, action_dim), diagonal=-1).unsqueeze(0)
         self.diag_mask = torch.diag(torch.diag(
             torch.ones(action_dim, action_dim))).unsqueeze(0)
+        return None
 
     def forward(self, state, action):
         L = self.p_model(state).view(-1, self.action_dim, self.action_dim)
@@ -77,6 +78,7 @@ class QModel_Bounded(nn.Module):
             action_dim, action_dim), diagonal=-1).unsqueeze(0)
         self.diag_mask = torch.diag(torch.diag(
             torch.ones(action_dim, action_dim))).unsqueeze(0)
+        return None
 
     def forward(self, state, action):
         L = self.p_model(state).view(-1, self.action_dim, self.action_dim)
@@ -120,13 +122,14 @@ class QModel_Bounded_RewardBased(nn.Module):
         super().__init__()
 
         self.action_dim = action_dim
-        self.action_min = torch.FloatTensor(action_min)
-        self.action_max = torch.FloatTensor(action_max)
+        self.action_min = action_min
+        self.action_max = action_max
         self.nu_model = nu_model
         self.mu_model = MuModel(nu_model)
         self.v_model = v_model
         self.beta = beta
         self.dt = dt
+        return None
 
     def forward(self, state, action):
         nu = self.nu_model(state)
@@ -166,13 +169,13 @@ class QModel_Bounded_GradientBased(nn.Module):
                  v_model, r, g, dt):
         super().__init__()
         self.action_dim = action_dim
-        self.action_min = torch.FloatTensor(action_min)
-        self.action_max = torch.FloatTensor(action_max)
+        self.action_min = action_min
+        self.action_max = action_max
         self.v_model = v_model
         self.dt = dt
         self.r = r
         self.g = g
-        self.tanh = nn.Tanh()
+        return None
 
     def forward(self, state, action):
         g = self.g(state.transpose(1, 0))
