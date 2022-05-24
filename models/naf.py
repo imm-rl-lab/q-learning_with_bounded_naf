@@ -1,30 +1,29 @@
 import random
-from collections import deque
-from copy import deepcopy
-
 import numpy as np
 import torch
 import torch.nn as nn
-
+from collections import deque
+from copy import deepcopy
 from models.linear_transformations import transform_interval
 
 
 class NAF:
     def __init__(self, action_min, action_max, q_model, noise,
-                 batch_size=64, gamma=1, tau=1e-2, q_model_lr=1e-3):
-        self.action_max = action_max
+                 batch_size=128, gamma=1, tau=1e-2, q_model_lr=1e-3, memory_size=10000000):
         self.action_min = action_min
+        self.action_max = action_max
         self.q_model = q_model
-        self.opt = torch.optim.Adam(self.q_model.parameters(), lr=q_model_lr)
-        self.loss = nn.MSELoss()
-        self.lr = q_model_lr
-        self.q_target = deepcopy(self.q_model)
-        self.tau = tau
-        self.memory = deque(maxlen=1000000)
-        self.gamma = gamma
-        self.batch_size = batch_size
         self.noise = noise
-        self.learning_n_per_fit = 1
+        self.batch_size = batch_size
+        self.gamma = gamma
+        self.tau = tau
+        self.lr = q_model_lr
+        
+        self.opt = torch.optim.Adam(self.q_model.parameters(), lr=self.lr)
+        self.loss = nn.MSELoss()
+        self.q_target = deepcopy(self.q_model)
+        self.memory = deque(maxlen=memory_size)
+        return None
 
     def save(self, path):
         torch.save({
@@ -38,15 +37,6 @@ class NAF:
             'batch_size': self.batch_size
         }, path)
 
-    def train(self):
-        self.noise.threshold = 1
-        self.memory.clear()
-        self.q_model.train()
-
-    def eval(self):
-        self.noise.threshold = 0
-        self.q_model.eval()
-
     def get_action(self, state):
         state = torch.FloatTensor(state)
         state.requires_grad = True
@@ -56,33 +46,33 @@ class NAF:
         action = transform_interval(action, self.action_min, self.action_max)
         return np.clip(action, self.action_min, self.action_max)
 
-    def update_targets(self, target, original):
+    def update_targets(self, target, original,loss):
+        self.opt.zero_grad()
+        loss.backward()
+        self.opt.step()
         for target_param, original_param in zip(target.parameters(), original.parameters()):
             target_param.data.copy_(
                 (1 - self.tau) * target_param.data + self.tau * original_param.data)
-
-    def add_to_memory(self, step):
-        self.memory.append(step)
+        return None
 
     def fit(self, step):
-        self.add_to_memory(step)
+        self.memory.append(step)
 
         if len(self.memory) >= self.batch_size:
-            batch = list(zip(*random.sample(self.memory, self.batch_size)))
-            states = torch.FloatTensor(np.array(batch[0]))
-            actions = torch.FloatTensor(np.array(batch[1]))
-            rewards = torch.FloatTensor(np.array(batch[2]))
-            dones = torch.FloatTensor(np.array(batch[3]))
-            next_states = torch.FloatTensor(np.array(batch[4]))
+            
+            #get batch
+            batch = random.sample(self.memory, self.batch_size)
+            states, actions, rewards, dones, next_states = map(torch.FloatTensor, zip(*batch))
             states.requires_grad = True
             rewards = rewards.reshape(self.batch_size, 1)
             dones = dones.reshape(self.batch_size, 1)
 
+            #get loss
             target = rewards + (1 - dones) * self.gamma * self.q_target.v_model(next_states).detach()
             q_values = self.q_model(states, actions)
             loss = self.loss(q_values, target)
             
-            self.opt.zero_grad()
-            loss.backward()
-            self.opt.step()
-            self.update_targets(self.q_target, self.q_model)
+            #train
+            self.update_targets(self.q_target, self.q_model, loss)
+        
+        return None
