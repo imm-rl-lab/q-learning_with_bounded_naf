@@ -4,31 +4,26 @@ from models.linear_transformations import transform_interval
 
 
 class MuModel(nn.Module):
-    def __init__(self, nu_model, clip):
+    def __init__(self, nu_model):
         super().__init__()
         self.nu_model = nu_model
-        self.tanh = nn.Tanh()
-        self.clip = clip
 
     def forward(self, state):
         nu = self.nu_model(state)
-        if self.clip:
-            return torch.clip(nu, -1, 1)
-        else:    
-            return self.tanh(nu)
+        return torch.clip(nu, -1, 1)  
 
 
 class QModel(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
-                 nu_model, v_model, p_model, clip=True):
+                 mu_model, v_model, p_model, dt):
         super().__init__()
         self.action_dim = action_dim
-        self.action_min = torch.FloatTensor(action_min)
-        self.action_max = torch.FloatTensor(action_max)
-        self.clip = clip
-        self.mu_model = MuModel(nu_model, clip)
+        self.action_min = action_min
+        self.action_max = action_max
+        self.mu_model = mu_model
         self.v_model = v_model
         self.p_model = p_model
+        self.dt = dt
         self.tril_mask = torch.tril(torch.ones(
             action_dim, action_dim), diagonal=-1).unsqueeze(0)
         self.diag_mask = torch.diag(torch.diag(
@@ -68,15 +63,16 @@ class QModel(nn.Module):
 
 class QModel_Bounded(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
-                 nu_model, v_model, p_model, clip=True):
+                 nu_model, v_model, p_model, dt):
         super().__init__()
         self.action_dim = action_dim
-        self.action_min = torch.FloatTensor(action_min)
-        self.action_max = torch.FloatTensor(action_max)
+        self.action_min = action_min
+        self.action_max = action_max
         self.nu_model = nu_model
-        self.mu_model = MuModel(nu_model, clip)
+        self.mu_model = MuModel(nu_model)
         self.v_model = v_model
         self.p_model = p_model
+        self.dt = dt
         self.tril_mask = torch.tril(torch.ones(
             action_dim, action_dim), diagonal=-1).unsqueeze(0)
         self.diag_mask = torch.diag(torch.diag(
@@ -120,14 +116,14 @@ class QModel_Bounded(nn.Module):
 
 class QModel_Bounded_RewardBased(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
-                 nu_model, v_model, beta, dt, clip=True):
+                 nu_model, v_model, beta, dt):
         super().__init__()
 
         self.action_dim = action_dim
         self.action_min = torch.FloatTensor(action_min)
         self.action_max = torch.FloatTensor(action_max)
         self.nu_model = nu_model
-        self.mu_model = MuModel(nu_model, clip)
+        self.mu_model = MuModel(nu_model)
         self.v_model = v_model
         self.beta = beta
         self.dt = dt
@@ -167,7 +163,7 @@ class QModel_Bounded_RewardBased(nn.Module):
 
 class QModel_Bounded_GradientBased(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
-                 v_model, r, g, dt, clip=True):
+                 v_model, r, g, dt):
         super().__init__()
         self.action_dim = action_dim
         self.action_min = torch.FloatTensor(action_min)
@@ -177,7 +173,6 @@ class QModel_Bounded_GradientBased(nn.Module):
         self.r = r
         self.g = g
         self.tanh = nn.Tanh()
-        self.clip = clip
 
     def forward(self, state, action):
         g = self.g(state.transpose(1, 0))
@@ -186,10 +181,8 @@ class QModel_Bounded_GradientBased(nn.Module):
         v.backward(torch.ones((state.shape[0], 1)))
         dv = state.grad[:, 1:].detach().unsqueeze(2)
         phi = (0.5 * (1 / self.r) * torch.bmm(g, dv)[:, :, 0])
-        if self.clip:
-            mu = transform_interval(torch.clip(phi, -1, 1), self.action_min, self.action_max)
-        else:
-            mu = transform_interval(self.tanh(phi), self.action_min, self.action_max)
+        mu = transform_interval(torch.clip(phi, -1, 1), self.action_min, self.action_max)
+
         action_phi = (phi - mu).unsqueeze(2)
         action_mu = (action - mu).unsqueeze(2)
         A = -self.dt * self.r * \
@@ -207,7 +200,4 @@ class QModel_Bounded_GradientBased(nn.Module):
         g = self.g(state.unsqueeze(1)).squeeze(1)
         g = torch.FloatTensor(g)
         mu = (0.5 * (1 / self.r) * torch.matmul(g, dv)).squeeze(0)
-        if self.clip:
-            return transform_interval(torch.clip(mu, -1, 1), self.action_min, self.action_max)
-        else:
-            return transform_interval(self.tanh(mu), self.action_min, self.action_max)
+        return transform_interval(torch.clip(mu, -1, 1), self.action_min, self.action_max)
