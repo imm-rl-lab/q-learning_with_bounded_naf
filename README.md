@@ -23,16 +23,21 @@ For training and evaluating described models, you will need python 3.6. To insta
     
 ```    
 pip install -r requirements.txt    
-```    
+```
     
 ## Training    
 To train, run this command:    
     
 ```    
 python train.py --config <path to config file>  
+```
+
+For example:
 ```    
+python train.py --config .\configs\pendulum\naf.json
+```
     
-### **Training config file  structure:** 
+### **Training config file structure:** 
 
 The training configuration file is presented as a json file with 3 required components - *environment*, *model*, *train_settings*.  
 Each of these blocks has its own fields, presented in the tables below:  
@@ -77,10 +82,6 @@ Possible *model_name* values:
 |save_rewards_path| path| \path\to\file       |   Path to save training reward history in numpy array format  
 |save_model_path| path| \path\to\file       |   Path to save trained agent  
 |save_plot_path| path| \path\to\file       |   Path to save training reward history plot  
-  
-  
-  
-  
   
 #### train_config.json example:
 
