@@ -1,42 +1,31 @@
-import argparse
-import json
-import os
-import random
-
+import argparse, json, os, random, torch
 import numpy as np
-import torch
-
 from environments.enviroment_generator import generate_env
-from models.agent_evaluation_module import SingleAgentEvaluationModule
+from models.solver import Solver
 from models.agent_generator import AgentGenerator
+from models.configure_seed import configure_seed
 
+        
+if __name__ == "__main__":
+    #get config
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', required=True)
+    args = parser.parse_args()
+    with open(args.config) as json_config_file:
+        config = json.load(json_config_file)
 
-def configure_random_seed(seed):
-    if seed:
-        torch.manual_seed(0)
-        random.seed(0)
-        np.random.seed(0)
+    #set seed
+    configure_seed(config.get('random_seed'))
 
-def file_path(string):
-    if os.path.isfile(string):
-        return string
-    else:
-        raise FileNotFoundError(string)
+    #get environment
+    env = generate_env(config['environment'])
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=file_path, required=True)
-args = parser.parse_args()
+    #get agent
+    default_config = {'lr': 1e-3, 'tau': 1e-2, 'gamma': 1, 'epoch_num': 1000, 'batch_size': 128}
+    agent_generator = AgentGenerator(env, default_config)
+    agent = agent_generator.load(config['model'], default_config)
+    agent.noise.threshold = 0
 
-with open(args.config) as json_config_file:
-    config = json.load(json_config_file)
-
-configure_random_seed(config.get('random_seed'))
-
-env = generate_env(config['environment'])
-
-agent = AgentGenerator(env).load(config['checkpoint'])
-env.set_dt(agent.q_model.dt)
-
-evaluation_module = SingleAgentEvaluationModule(env)
-
-evaluation_module.eval_agent(agent)
+    #get trajectory
+    solver = Solver(env)
+    solver.evaluate(agent)
