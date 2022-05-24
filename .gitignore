@@ -127,3 +127,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+__pycache__/
+/.idea/.gitignore
+/.idea/differential-games-rl.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/other.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.vscode/settings.json
+/.idea/vcs.xml
+
