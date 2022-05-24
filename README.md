@@ -1,14 +1,22 @@
+# Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis
 
-  
-# This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis"
+The open-source implementation of the algorithms and the optimal control problems presented in "Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis". 
 
-It currently includes code of optimal control problems and algorithms from the paper. The following optimal control problems are considered:    
-    
-- Target Problem
-- Van der Pol oscillator    
+The following algorithms are implemented:
+
+- Normalized Advantage Functions (NAF)
+- Bounded Normalized Advantage Functions (BNAF)
+- Reward-Based Bounded Normalized Advantage Functions (RB-NAF)
+- Gradient-Based Bounded Normalized Advantage Functions (GB-NAF)
+- Deep Deterministic Policy Gradient (DDPG)
+
+The following optimal control problems are considered:    
+
+- Van der Pol oscillator
 - Pendulum
-- Dubins Car    
- 
+- Dubins Car
+- Target Problem
+
  ## Requirements 
  
 For training and evaluating described models, you will need python 3.6. To install requirements:    
@@ -135,12 +143,12 @@ This script prints to the console all the states of the environment during the e
     
 **Plots:**    
  Figures below show the results of NAF, BNAF, RB-BNAF, GB-BNAF, DDPG algorithms averaged over 10 seeds. We use seed from 0 to 9. The curves are averaged for 20 episode for better visualization. 
-    
-| ![target-problem](plots/pic_tp.png) | ![van-der-pol](plots/pic_vdp.png) |    
+
+| ![van-der-pol](plots/pic_vdp.png) | ![pendulum](plots/pic_p.png) |    
 |:----:|:----:|    
-|  *Target problem* | *Van der Pol oscillator* |    
-| ![pendulum](plots/pic_p.png) | ![dubins-car](plots/pic_dc.png) |    
-|  *Pendulum* | *Dubins car* |    
+| *Van der Pol oscillator* | *Pendulum* |    
+| ![dubins-car](plots/pic_dc.png) | ![target-problem](plots/pic_tp.png) |    
+| *Dubins car* | *A target problem* |
     
 #### Contributing 
 If you'd like to contribute, or have any suggestions for these guidelines, you can open an issue on this GitHub repository.    
