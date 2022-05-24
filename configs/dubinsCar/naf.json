@@ -1,0 +1,20 @@
+{
+  "environment": {
+    "env_name": "dubins-car",
+     "dt": 0.1
+  },
+  "model": {
+    "model_name": "naf",
+    "lr": 0.001,
+    "gamma": 1
+  },
+  "train_settings": {
+    "epoch_num": 1000,
+    "batch_size": 128,
+    "render": false,
+    "random_seed": 0,
+    "save_rewards_path": "./rewards/dubinsCar/naf",
+    "save_model_path": "./checkpoints/dubinsCar/naf",
+    "save_plot_path": "./plots/dubinsCar-naf"
+  }
+}

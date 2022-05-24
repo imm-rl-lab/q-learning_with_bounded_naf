@@ -1,0 +1,8 @@
+{    
+  "environment": {    
+     "env_name": "van-der-pol",      
+     "dt": 0.1    
+ },  
+  "checkpoint": checkpoints/vanDerPol,
+  "random_seed": 0      
+}

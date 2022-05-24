@@ -1,0 +1,20 @@
+{
+  "environment": {
+    "env_name": "pendulum",
+     "dt": 0.1
+  },
+  "model": {
+    "model_name": "bnaf",
+    "lr": 0.001,
+    "gamma": 1
+  },
+  "train_settings": {
+    "epoch_num": 1000,
+    "batch_size": 128,
+    "render": false,
+    "random_seed": 0,
+    "save_rewards_path": "./rewards/pendulum/bnaf",
+    "save_model_path": "./checkpoints/pendulum/bnaf",
+    "save_plot_path": "./plots/pendulum-bnaf"
+  }
+}
