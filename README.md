@@ -1,6 +1,6 @@
 # Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis
 
-The open-source implementation of the algorithms and the optimal control problems presented in the paper ["Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis // Thirty-sixth Conference on Neural Information Processing Systems (NeurIPS 2022)"]https://github.com/imm-rl-lab/q-learning_with_bounded_naf/raw/main/paper_preprint.pdf).
+The open-source implementation of the algorithms and the optimal control problems presented in the paper ["Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis // Thirty-sixth Conference on Neural Information Processing Systems (NeurIPS 2022)"](https://github.com/imm-rl-lab/q-learning_with_bounded_naf/raw/main/paper_preprint.pdf).
 
 Authors: Anton Plaksin, Stepan Martyanov
 
